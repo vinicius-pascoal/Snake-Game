@@ -6,7 +6,7 @@ import { equalPos, getRandomPosition } from "@/utils/helpers";
 import Snake from "./Snake";
 import Food from "./Food";
 
-const GRID_SIZE = 30;
+const GRID_SIZE = 35;
 const CELL_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 5, y: 5 }];
 
@@ -149,7 +149,7 @@ export default function Board() {
 
       {/* Tabuleiro */}
       <div
-        className="relative bg-gray-900 border-2 border-white"
+        className="relative bg-gray-900 border-4 border-red-600 rounded-lg "
         style={{
           width: `${GRID_SIZE * CELL_SIZE}px`,
           height: `${GRID_SIZE * CELL_SIZE}px`,
@@ -158,41 +158,45 @@ export default function Board() {
         <Snake segments={snake} />
         <Food position={food} />
       </div>
-{isRunning && (
-  <div className="md:hidden mt-6 flex flex-col items-center gap-4 z-10">
-    <motion.button
-      whileTap={{ scale: 0.9 }}
-      onClick={() => setDir((prev) => (prev !== "DOWN" ? "UP" : prev))}
-      className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
-    >
-      ↑
-    </motion.button>
+      {isRunning && (
+        <div className="md:hidden mt-6 flex flex-col items-center gap-4 z-10">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setDir((prev) => (prev !== "DOWN" ? "UP" : prev))}
+            className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+          >
+            ↑
+          </motion.button>
 
-    <div className="flex gap-6">
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setDir((prev) => (prev !== "RIGHT" ? "LEFT" : prev))}
-        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
-      >
-        ←
-      </motion.button>
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setDir((prev) => (prev !== "UP" ? "DOWN" : prev))}
-        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
-      >
-        ↓
-      </motion.button>
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setDir((prev) => (prev !== "LEFT" ? "RIGHT" : prev))}
-        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
-      >
-        →
-      </motion.button>
-    </div>
-  </div>
-)}
+          <div className="flex gap-6">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() =>
+                setDir((prev) => (prev !== "RIGHT" ? "LEFT" : prev))
+              }
+              className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+            >
+              ←
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setDir((prev) => (prev !== "UP" ? "DOWN" : prev))}
+              className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+            >
+              ↓
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() =>
+                setDir((prev) => (prev !== "LEFT" ? "RIGHT" : prev))
+              }
+              className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+            >
+              →
+            </motion.button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
