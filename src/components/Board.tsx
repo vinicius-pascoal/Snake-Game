@@ -1,30 +1,42 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Position, Direction } from "@/types";
 import { equalPos, getRandomPosition } from "@/utils/helpers";
 import Snake from "./Snake";
 import Food from "./Food";
 
-const GRID_SIZE = 20;
-const INITIAL_SNAKE = [{ x: 8, y: 8 }];
+const GRID_SIZE = 30; // 🔧 aumentamos de 20 → 30
+const CELL_SIZE = 20; // em pixels
+const INITIAL_SNAKE = [{ x: 5, y: 5 }];
 
 export default function Board() {
   const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
   const [food, setFood] = useState<Position>(getRandomPosition(GRID_SIZE));
-  const [dir, setDir] = useState<Direction>("RIGHT");
+  const [dir, setDir] = useState<Direction | null>(null); // começa parado
+  const gameStarted = useRef(false); // impede movimento antes da primeira tecla
 
+  // ⌨️ Captura de teclas
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp" && dir !== "DOWN") setDir("UP");
-      if (e.key === "ArrowDown" && dir !== "UP") setDir("DOWN");
-      if (e.key === "ArrowLeft" && dir !== "RIGHT") setDir("LEFT");
-      if (e.key === "ArrowRight" && dir !== "LEFT") setDir("RIGHT");
+    const onKeyDown = (e: KeyboardEvent) => {
+      let newDir: Direction | null = null;
+      if (e.key === "ArrowUp" && dir !== "DOWN") newDir = "UP";
+      if (e.key === "ArrowDown" && dir !== "UP") newDir = "DOWN";
+      if (e.key === "ArrowLeft" && dir !== "RIGHT") newDir = "LEFT";
+      if (e.key === "ArrowRight" && dir !== "LEFT") newDir = "RIGHT";
+
+      if (newDir) {
+        setDir(newDir);
+        gameStarted.current = true;
+      }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [dir]);
 
+  // 🎮 Lógica do jogo
   useEffect(() => {
+    if (!gameStarted.current || dir === null) return;
+
     const interval = setInterval(() => {
       setSnake((prev) => {
         const head = { ...prev[0] };
@@ -34,10 +46,13 @@ export default function Board() {
         if (dir === "RIGHT") head.x += 1;
 
         const newSnake = [head, ...prev];
-        const ateFood = equalPos(head, food);
 
-        if (!ateFood) newSnake.pop();
-        else setFood(getRandomPosition(GRID_SIZE));
+        const ateFood = equalPos(head, food);
+        if (!ateFood) {
+          newSnake.pop(); // remover último segmento
+        } else {
+          setFood(getRandomPosition(GRID_SIZE)); // 🍎 nova comida
+        }
 
         const outOfBounds =
           head.x < 0 || head.y < 0 || head.x >= GRID_SIZE || head.y >= GRID_SIZE;
@@ -45,6 +60,8 @@ export default function Board() {
 
         if (outOfBounds || hitSelf) {
           alert("Game Over");
+          setDir(null);
+          gameStarted.current = false;
           return INITIAL_SNAKE;
         }
 
@@ -56,7 +73,13 @@ export default function Board() {
   }, [dir, food]);
 
   return (
-    <div className="relative w-[400px] h-[400px] bg-gray-900 border-2 border-white mx-auto mt-10">
+    <div
+      className="relative bg-gray-900 border-2 border-white mx-auto mt-10"
+      style={{
+        width: `${GRID_SIZE * CELL_SIZE}px`,
+        height: `${GRID_SIZE * CELL_SIZE}px`,
+      }}
+    >
       <Snake segments={snake} />
       <Food position={food} />
     </div>
