@@ -84,7 +84,10 @@ export default function Board() {
         }
 
         const outOfBounds =
-          head.x < 0 || head.y < 0 || head.x >= GRID_SIZE || head.y >= GRID_SIZE;
+          head.x < 0 ||
+          head.y < 0 ||
+          head.x >= GRID_SIZE ||
+          head.y >= GRID_SIZE;
         const hitSelf = newSnake.slice(1).some((s) => equalPos(s, head));
 
         if (outOfBounds || hitSelf) {
@@ -155,6 +158,41 @@ export default function Board() {
         <Snake segments={snake} />
         <Food position={food} />
       </div>
+{isRunning && (
+  <div className="md:hidden mt-6 flex flex-col items-center gap-4 z-10">
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={() => setDir((prev) => (prev !== "DOWN" ? "UP" : prev))}
+      className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+    >
+      ↑
+    </motion.button>
+
+    <div className="flex gap-6">
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setDir((prev) => (prev !== "RIGHT" ? "LEFT" : prev))}
+        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+      >
+        ←
+      </motion.button>
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setDir((prev) => (prev !== "UP" ? "DOWN" : prev))}
+        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+      >
+        ↓
+      </motion.button>
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setDir((prev) => (prev !== "LEFT" ? "RIGHT" : prev))}
+        className="w-16 h-16 rounded-full bg-white text-black text-2xl font-bold shadow-lg"
+      >
+        →
+      </motion.button>
+    </div>
+  </div>
+)}
     </div>
   );
 }
