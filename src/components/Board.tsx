@@ -1,21 +1,30 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Position, Direction } from "@/types";
 import { equalPos, getRandomPosition } from "@/utils/helpers";
 import Snake from "./Snake";
 import Food from "./Food";
 
-const GRID_SIZE = 30; // 🔧 aumentamos de 20 → 30
-const CELL_SIZE = 20; // em pixels
+const GRID_SIZE = 30;
+const CELL_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 5, y: 5 }];
 
 export default function Board() {
   const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
   const [food, setFood] = useState<Position>(getRandomPosition(GRID_SIZE));
-  const [dir, setDir] = useState<Direction | null>(null); // começa parado
-  const gameStarted = useRef(false); // impede movimento antes da primeira tecla
+  const [dir, setDir] = useState<Direction | null>(null);
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const gameStarted = useRef(false);
 
-  // ⌨️ Captura de teclas
+  // ⬆️ Carrega recorde ao iniciar
+  useEffect(() => {
+    const saved = localStorage.getItem("snake-high-score");
+    if (saved) setHighScore(parseInt(saved));
+  }, []);
+
+  // ⌨️ Movimento do jogador
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       let newDir: Direction | null = null;
@@ -33,25 +42,28 @@ export default function Board() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [dir]);
 
-  // 🎮 Lógica do jogo
+  // 🧠 Lógica do jogo
   useEffect(() => {
     if (!gameStarted.current || dir === null) return;
 
     const interval = setInterval(() => {
-      setSnake((prev) => {
-        const head = { ...prev[0] };
+      setSnake((prevSnake) => {
+        const head = { ...prevSnake[0] };
+
         if (dir === "UP") head.y -= 1;
         if (dir === "DOWN") head.y += 1;
         if (dir === "LEFT") head.x -= 1;
         if (dir === "RIGHT") head.x += 1;
 
-        const newSnake = [head, ...prev];
+        const newSnake = [head, ...prevSnake];
 
         const ateFood = equalPos(head, food);
-        if (!ateFood) {
-          newSnake.pop(); // remover último segmento
+
+        if (ateFood) {
+          setFood(getRandomPosition(GRID_SIZE));
+          setScore((prev) => prev + 1);
         } else {
-          setFood(getRandomPosition(GRID_SIZE)); // 🍎 nova comida
+          newSnake.pop(); // remove a cauda apenas se não comeu
         }
 
         const outOfBounds =
@@ -59,9 +71,14 @@ export default function Board() {
         const hitSelf = newSnake.slice(1).some((s) => equalPos(s, head));
 
         if (outOfBounds || hitSelf) {
-          alert("Game Over");
+          if (score > highScore) {
+            localStorage.setItem("snake-high-score", score.toString());
+            setHighScore(score);
+          }
+          alert(`Game Over! Pontuação: ${score}`);
           setDir(null);
           gameStarted.current = false;
+          setScore(0);
           return INITIAL_SNAKE;
         }
 
@@ -70,18 +87,32 @@ export default function Board() {
     }, 150);
 
     return () => clearInterval(interval);
-  }, [dir, food]);
+  }, [dir, food, score, highScore]);
 
   return (
-    <div
-      className="relative bg-gray-900 border-2 border-white mx-auto mt-10"
-      style={{
-        width: `${GRID_SIZE * CELL_SIZE}px`,
-        height: `${GRID_SIZE * CELL_SIZE}px`,
-      }}
-    >
-      <Snake segments={snake} />
-      <Food position={food} />
+    <div className="flex flex-col items-center mt-6 gap-2">
+      <motion.div
+        key={score}
+        className="text-xl font-bold text-white"
+        initial={{ scale: 1 }}
+        animate={{ scale: [1, 1.3, 1] }}
+        transition={{ duration: 0.3 }}
+      >
+        Pontuação: <span className="text-green-400">{score}</span>
+      </motion.div>
+
+      <div className="text-sm text-gray-400">Recorde: {highScore}</div>
+
+      <div
+        className="relative bg-gray-900 border-2 border-white"
+        style={{
+          width: `${GRID_SIZE * CELL_SIZE}px`,
+          height: `${GRID_SIZE * CELL_SIZE}px`,
+        }}
+      >
+        <Snake segments={snake} />
+        <Food position={food} />
+      </div>
     </div>
   );
 }
