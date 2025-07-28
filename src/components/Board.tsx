@@ -6,7 +6,7 @@ import { equalPos, getRandomPosition } from "@/utils/helpers";
 import Snake from "./Snake";
 import Food from "./Food";
 
-const GRID_SIZE = 35;
+const GRID_SIZE = 30;
 const CELL_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 5, y: 5 }];
 
@@ -149,7 +149,7 @@ export default function Board() {
 
       {/* Tabuleiro */}
       <div
-        className="relative bg-gray-900 border-4 border-red-600 rounded-lg "
+        className="relative bg-gray-900 border-2 border-red-900 rounded-lg "
         style={{
           width: `${GRID_SIZE * CELL_SIZE}px`,
           height: `${GRID_SIZE * CELL_SIZE}px`,
