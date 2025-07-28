@@ -108,10 +108,7 @@ export default function SnakeBackground() {
 
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
-      {/* 🎨 Gradiente radial do centro claro ao azul escuro */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#2c89f2_0%,_#00162e_100%)]" />
-
-      {/* 🐍 Cobras em SVG por cima */}
       <svg
         ref={canvasRef}
         width="100%"
